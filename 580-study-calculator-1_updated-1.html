@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>580 Study Calculator — Toán 12</title>
+<style>
+:root{
+  --bg1:#08111f;--bg2:#12233d;--card:#101a2c;--card2:#17243a;
+  --key:#233452;--key2:#31486d;--screen:#eef6df;--ink:#172016;
+  --accent:#63d6ff;--accent2:#8b7cff;--good:#54df9b;--bad:#ff6b7a;
+  --text:#f4f7ff;--muted:#9eacc4;--border:#2b4165;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:14px;background:radial-gradient(circle at 20% 0%,#203b67 0,#0b1424 42%,#050912 100%);font-family:Inter,Arial,sans-serif;color:var(--text)}
+button,input,select,textarea{font:inherit}
+.app{width:min(980px,100%);margin:auto}
+.header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.brand{font-weight:900;letter-spacing:.5px}.brand small{display:block;color:var(--muted);font-weight:500;margin-top:3px}
+.header-actions{display:flex;gap:7px}
+.topbtn,.mini{border:1px solid var(--border);background:linear-gradient(180deg,var(--key2),var(--key));color:#fff;border-radius:9px;padding:8px 11px;cursor:pointer}
+.topbtn:hover,.mini:hover{filter:brightness(1.12)}
+.calc{background:linear-gradient(145deg,#111b2c,#0b1322);border:1px solid #314766;border-radius:22px;padding:15px;box-shadow:0 24px 70px #0008}
+.screen{background:var(--screen);color:var(--ink);border:5px solid #090d13;border-radius:12px;min-height:178px;padding:10px;position:relative;box-shadow:inset 0 0 15px #0005;font-family:"Courier New",monospace}
+.status{display:flex;justify-content:flex-end;gap:13px;font-size:12px}.expr{font-size:20px;min-height:34px;overflow-wrap:anywhere}.result{font-size:30px;text-align:right;min-height:40px;overflow-wrap:anywhere}.hint{font:11px Arial;margin-top:8px;opacity:.68}
+.keys{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:12px}
+.key{min-height:45px;border:0;border-radius:9px;background:linear-gradient(#314564,#1d2c45);color:#fff;font-weight:800;box-shadow:0 2px 0 #05080d;font-size:13px;cursor:pointer}
+.key:active{transform:translateY(2px);box-shadow:none}.key.op{background:linear-gradient(#46617e,#2e435d)}.key.eq{background:linear-gradient(#4c8db5,#35627e)}.key.danger{background:linear-gradient(#86404d,#5b2d37)}
+.key.fn{position:relative;font-size:10px}.key.fn b{position:absolute;top:3px;left:5px;color:#ffe37b;font-size:8px}.key.fn i{position:absolute;top:3px;right:5px;color:#ff7b8a;font-style:normal;font-size:8px}
+.wide{grid-column:span 2}
+.panel{display:none;margin-top:12px;background:linear-gradient(145deg,#0d1727,#121f33);border:1px solid var(--border);border-radius:14px;padding:13px}
+.panel.active{display:block}.panel h3{margin:0 0 8px;font-size:17px}.panel p{color:var(--muted);margin:7px 0}
+.panel input,.panel select,.panel textarea{width:100%;padding:9px;margin:4px 0;background:#0a1220;border:1px solid #304667;color:#fff;border-radius:8px;outline:none}
+.panel input:focus,.panel select:focus,.panel textarea:focus{border-color:var(--accent)}
+.row{display:flex;gap:7px}.row>*{flex:1}.out{margin-top:9px;padding:10px;background:#070d16;border:1px solid #253a58;border-radius:8px;white-space:pre-wrap;overflow:auto;font-family:"Courier New",monospace;color:#dff1d0;line-height:1.5}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.choice{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.choice button{padding:10px;border:1px solid var(--border);border-radius:9px;background:#172943;color:#fff;cursor:pointer}.choice button.active{outline:2px solid var(--accent);background:#213b61}
+.menu{display:none;position:absolute;z-index:5;inset:0;background:var(--screen);color:var(--ink);padding:10px;font-family:Arial;border-radius:6px}.menu.show{display:block}.menu h3{margin:0 0 9px}.gridmenu{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.gridmenu button{background:#cbd5b9;border:1px solid #68725f;border-radius:6px;padding:9px 4px;cursor:pointer}
+.history{max-height:100px;overflow:auto;font-size:11px;margin-top:7px}
+.badge{display:inline-block;padding:3px 7px;border-radius:99px;background:#17324b;color:var(--accent);font-size:11px;margin:2px}
+.good{color:var(--good);font-weight:800}.bad{color:var(--bad);font-weight:800}
+.footer{color:var(--muted);text-align:center;font-size:11px;margin-top:10px}
+body.light{--bg1:#dcecff;--bg2:#f7fbff;--card:#fff;--card2:#f2f7fd;--key:#d9e6f5;--key2:#c5d7eb;--text:#17243a;--muted:#5b6b82;--border:#b9cbe0}
+body.neon{--bg1:#150c24;--bg2:#061c20;--card:#11131f;--card2:#1a2030;--key:#24204a;--key2:#3b2c6d;--accent:#54ffd7;--accent2:#ff5ce1;--border:#55458b}
+body.paper{--bg1:#e9dfcc;--bg2:#fffaf0;--card:#fffdf7;--card2:#f5eee1;--key:#e7dcc9;--key2:#d7c9b4;--text:#2b2a27;--muted:#6d6559;--border:#c8b99f}
+@media(max-width:620px){.keys{gap:5px}.key{min-height:41px;font-size:11px}.screen{min-height:160px}.result{font-size:25px}.gridmenu{grid-template-columns:repeat(2,1fr)}.grid2,.grid3,.row{grid-template-columns:1fr;display:grid}.header{align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="brand">580 STUDY CALCULATOR<small>anmongu's math assistant</small></div>
+    <div class="header-actions">
+      <button class="topbtn" onclick="choose('Giao diện')">🎨 Giao diện</button>
+      <button class="topbtn" onclick="openMenu()">☰ Menu</button>
+    </div>
+  </div>
+
+  <div class="calc">
+    <div class="screen" id="screen">
+      <div class="status"><span id="mode">DEG</span><span id="mem">M</span><span id="anss">Ans</span></div>
+      <div class="expr" id="expr">0</div>
+      <div class="result" id="result">0</div>
+      <div class="hint">MENU: chọn chuyên đề • 🎨: đổi giao diện • SHIFT/ALPHA: chức năng phụ</div>
+      <div class="menu" id="menu"><h3>MENU — TOÁN 12</h3><div class="gridmenu" id="menuGrid"></div></div>
+    </div>
+
+    <div id="panels"></div>
+
+    <div class="keys">
+      <button class="key fn" onclick="shift()">SHIFT</button><button class="key fn" onclick="alpha()">ALPHA</button>
+      <button class="key fn" onclick="openMenu()">MENU</button><button class="key fn" onclick="exitMode()">EXIT</button>
+      <button class="key fn" onclick="replay(-1)">◀</button><button class="key fn" onclick="replay(1)">▶</button>
+      <button class="key fn" onclick="replay(0)">▲</button><button class="key fn" onclick="replay(0)">▼</button>
+      <button class="key" onclick="insert('(')">(</button><button class="key" onclick="insert(')')">)</button>
+      <button class="key danger" onclick="allClear()">AC</button><button class="key danger" onclick="del()">DEL</button>
+      <button class="key fn" onclick="choose('Số phức')"><b>SỐ PHỨC</b>7</button><button class="key fn" onclick="choose('Thống kê')"><b>THỐNG KÊ</b>8</button><button class="key fn" onclick="choose('Ma trận')"><b>MA TRẬN</b>9</button>
+      <button class="key op" onclick="insert('÷')">÷</button><button class="key op" onclick="insert('×')">×</button><button class="key op" onclick="insert('−')">−</button>
+      <button class="key" onclick="insert('7')">7</button><button class="key" onclick="insert('8')">8</button><button class="key" onclick="insert('9')">9</button>
+      <button class="key op" onclick="insert('+')">+</button><button class="key" onclick="insert('^')">xʸ</button><button class="key" onclick="insert('√(')">√</button>
+      <button class="key" onclick="insert('4')">4</button><button class="key" onclick="insert('5')">5</button><button class="key" onclick="insert('6')">6</button>
+      <button class="key" onclick="insert('π')">π</button><button class="key" onclick="insert('e')">e</button><button class="key" onclick="insert('!')">x!</button>
+      <button class="key" onclick="insert('1')">1</button><button class="key" onclick="insert('2')">2</button><button class="key" onclick="insert('3')">3</button>
+      <button class="key fn" onclick="insert('sin(')"><b>asin</b>sin</button><button class="key fn" onclick="insert('cos(')"><b>acos</b>cos</button><button class="key fn" onclick="insert('tan(')"><b>atan</b>tan</button>
+      <button class="key" onclick="insert('0')">0</button><button class="key" onclick="insert('.')">.</button><button class="key" onclick="insert('Ans')">Ans</button>
+      <button class="key fn" onclick="insert('log(')"><b>10ˣ</b>log</button><button class="key fn" onclick="insert('ln(')"><b>eˣ</b>ln</button><button class="key eq" onclick="calculate()">EXE</button>
+      <button class="key fn wide" onclick="insert('abs(')">|x| / ABS</button><button class="key fn" onclick="choose('Đạo hàm')">d/dx</button><button class="key fn" onclick="insert('∫(')">∫</button>
+      <button class="key fn" onclick="insert('Σ(')">Σ</button><button class="key fn" onclick="insert('Π(')">Π</button>
+    </div>
+    <div class="footer">Bản nâng cấp: giao diện tùy chọn • Đạo hàm • PT/BPT/HPT bậc 1–4 • Đúng/sai</div>
+  </div>
+</div>
+
+<script>
+const menus=["Tính","Đạo hàm","Phương trình","Bất phương trình","Hệ phương trình","Đúng/sai","Bảng giá trị","Thống kê","Số phức","Ma trận","Vectơ","Tỉ lệ","Phân phối","Giao diện"];
+let state={expr:"",ans:0,memory:0,shift:false,alpha:false,deg:true,history:[],histPos:-1};
+const $=id=>document.getElementById(id);
+function render(){ $("expr").textContent=state.expr||"0"; $("result").textContent=state.ansDisplay??(state.expr?"":"0"); $("mode").textContent=state.deg?"DEG":"RAD"; $("mem").textContent=state.memory?"M":""; $("anss").textContent="Ans"; }
+function menuResult(title,value){state.expr=title;state.ansDisplay=String(value);render();$("screen").scrollIntoView({behavior:"smooth",block:"nearest"})}
+function menuError(title,value){menuResult(title,value)}
+
+function insert(x){state.expr+=x;state.ansDisplay="";render()}
+function allClear(){state.expr="";state.ansDisplay="0";render()}
+function del(){state.expr=state.expr.slice(0,-1);state.ansDisplay="";render()}
+function shift(){state.shift=!state.shift;state.ansDisplay=state.shift?"SHIFT ON":"";render();setTimeout(()=>{state.ansDisplay="";render()},700)}
+function alpha(){state.alpha=!state.alpha;state.ansDisplay=state.alpha?"ALPHA ON":"";render();setTimeout(()=>{state.ansDisplay="";render()},700)}
+function openMenu(){ $("menu").classList.toggle("show") }
+function exitMode(){document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));$("menu").classList.remove("show");state.ansDisplay="";render()}
+function replay(dir){if(!state.history.length)return;if(dir===0)state.expr=state.history.at(-1).e;else{state.histPos=Math.max(0,Math.min(state.history.length-1,(state.histPos<0?state.history.length-1:state.histPos)+dir));state.expr=state.history[state.histPos].e}render()}
+function err(msg){state.ansDisplay=msg;render()}
+function fact(n){if(n<0||n%1)return NaN;let r=1;for(let i=2;i<=n;i++)r*=i;return r}
+function prep(s){return s.replaceAll("×","*").replaceAll("÷","/").replaceAll("−","-").replaceAll("π","Math.PI").replace(/\be\b/g,"Math.E").replace(/\bAns\b/g,"state.ans").replace(/\^/g,"**").replace(/√\(/g,"Math.sqrt(").replace(/\blog\(/g,"Math.log10(").replace(/\bln\(/g,"Math.log(").replace(/\babs\(/g,"Math.abs(").replace(/(\d+(\.\d+)?)!/g,"fact($1)")}
+function calculate(){if(!state.expr)return;try{let s=prep(state.expr);let trig=(fn,x)=>state.deg?Math[fn](x*Math.PI/180):Math[fn](x);s=s.replace(/Math\.(sin|cos|tan)\(/g,"trig('$1',");let v=Function("state","fact","trig","return ("+s+")")(state,fact,trig);if(!Number.isFinite(v))throw 0;state.ans=v;state.ansDisplay=format(v);state.history.push({e:state.expr,r:state.ansDisplay});state.histPos=state.history.length-1}catch(e){err("LỖI TÍNH TOÁN / CÚ PHÁP")}}
+function format(v){if(typeof v!=="number")return String(v);if(Math.abs(v)<1e-12)v=0;return Number(v.toPrecision(12)).toString()}
+function choose(name){$("menu").classList.remove("show");if(name==="Tính"){exitMode();return}showPanel(name)}
+function showPanel(name){let id="p_"+name.replace(/\W/g,"_");let old=$(id);if(old){document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));old.classList.add("active");return}let p=document.createElement("div");p.id=id;p.className="panel active";p.innerHTML=panelHTML(name);$("panels").appendChild(p);if(name==="Phương trình")eqInputs();if(name==="Bất phương trình")ineqInputs();if(name==="Hệ phương trình")systemInputs()}
+function panelHTML(n){
+ if(n==="Đạo hàm")return `<h3>📈 Đạo hàm</h3><p>Nhập hàm theo x và điểm cần tính. Hỗ trợ đa thức, sin, cos, tan, log, ln, √ và lũy thừa.</p><div class=row><input id=df placeholder="Ví dụ: x^3-2*x^2+5*x-1"><input id=dx value="1" placeholder="x₀"></div><button class=mini onclick=derivativeCalc()>TÍNH f'(x₀)</button><div class=out id=do>—</div>`;
+ if(n==="Phương trình")return `<h3>🧮 Phương trình đa thức bậc 1 → 4</h3><p>Chọn bậc rồi nhập hệ số theo dạng aₙxⁿ + ... + a₁x + a₀ = 0.</p><select id=degEq onchange=eqInputs()><option value=1>Bậc 1</option><option value=2>Bậc 2</option><option value=3>Bậc 3</option><option value=4 selected>Bậc 4</option></select><div id=eqcoef></div><button class=mini onclick=polyEqCalc()>GIẢI PHƯƠNG TRÌNH</button><div class=out id=eo>—</div>`;
+ if(n==="Bất phương trình")return `<h3>📊 Bất phương trình đa thức bậc 1 → 4</h3><p>Nhập đa thức và chọn dấu. Công cụ tìm nghiệm thực và lập khoảng nghiệm theo dấu của đa thức.</p><select id=degIneq onchange=ineqInputs()><option value=1>Bậc 1</option><option value=2>Bậc 2</option><option value=3>Bậc 3</option><option value=4 selected>Bậc 4</option></select><select id=ineqOp><option value=">">f(x) &gt; 0</option><option value=">=">f(x) ≥ 0</option><option value="<">f(x) &lt; 0</option><option value="<=">f(x) ≤ 0</option></select><div id=ineqcoef></div><button class=mini onclick=polyIneqCalc()>GIẢI BẤT PHƯƠNG TRÌNH</button><div class=out id=io>—</div>`;
+ if(n==="Hệ phương trình")return `<h3>🔢 Hệ phương trình</h3><p>Hỗ trợ hệ 2 phương trình bậc nhất 2 ẩn và hệ 3 phương trình bậc nhất 3 ẩn.</p><select id=sysN onchange=systemInputs()><option value=2>2 ẩn</option><option value=3>3 ẩn</option></select><div id=syscoef></div><button class=mini onclick=systemCalc()>GIẢI HỆ</button><div class=out id=syso>—</div>`;
+ if(n==="Đúng/sai")return `<h3>✅ Đúng/sai</h3><p>Kiểm tra một phép tính hoặc mệnh đề số học có đúng hay sai.</p><div class=row><input id=vl placeholder="Vế trái / phép tính"><select id=checkop><option value="=">=</option><option value=">">&gt;</option><option value="<">&lt;</option><option value=">=">≥</option><option value="<=">≤</option><option value="!=">≠</option></select><input id=vr placeholder="Vế phải"></div><button class=mini onclick=verifyCalc()>KIỂM TRA</button><div class=out id=vo2>—</div>`;
+ if(n==="Giao diện")return `<h3>🎨 Chọn / tạo giao diện</h3><p>Chọn nhanh một phong cách. Bạn cũng có thể nhập màu nền và màu nhấn để tạo giao diện riêng.</p><div class=choice><button onclick=setTheme('default')>🌌 Midnight</button><button onclick=setTheme('light')>☀️ Light</button><button onclick=setTheme('neon')>💜 Neon</button><button onclick=setTheme('paper')>📖 Paper</button></div><hr><div class=grid2><input id=customBg placeholder="Màu nền, ví dụ #101827"><input id=customAccent placeholder="Màu nhấn, ví dụ #63d6ff"></div><button class=mini onclick=customTheme()>TẠO GIAO DIỆN</button><button class=mini onclick=resetTheme()>ĐẶT LẠI</button><div class=out id=themeo>Giao diện sẽ được lưu trên thiết bị.</div>`;
+ if(n==="Bảng giá trị")return `<h3>Bảng giá trị</h3><input id=fx placeholder="f(x), ví dụ x^2+2*x"><div class=row><input id=st value="-5"><input id=en value="5"><input id=sp value="1"></div><button class=mini onclick=tableCalc()>EXE</button><div class=out id=to>—</div>`;
+ if(n==="Thống kê")return `<h3>Thống kê</h3><textarea id=statData placeholder="2,4,5,7,8"></textarea><button class=mini onclick=statsCalc()>TÍNH</button><div class=out id=so>—</div>`;
+ if(n==="Số phức")return `<h3>Số phức — a + bi</h3><div class=row><input id=c1 placeholder="a+bi"><input id=c2 placeholder="c+di"></div><button class=mini onclick=complexCalc()>TÍNH TỔNG</button><div class=out id=co>—</div>`;
+ if(n==="Ma trận")return `<h3>Ma trận 2×2</h3><div class=row><input id=m11 value="1"><input id=m12 value="2"></div><div class=row><input id=m21 value="3"><input id=m22 value="4"></div><button class=mini onclick=matrixCalc('det')>ĐỊNH THỨC</button> <button class=mini onclick=matrixCalc('inv')>NGHỊCH ĐẢO</button><div class=out id=mo>—</div>`;
+ if(n==="Vectơ")return `<h3>Vectơ</h3><div class=row><input id=vax placeholder="Ax"><input id=vay placeholder="Ay"><input id=vaz placeholder="Az"></div><div class=row><input id=vbx placeholder="Bx"><input id=vby placeholder="By"><input id=vbz placeholder="Bz"></div><button class=mini onclick=vectorCalc()>TÍNH</button><div class=out id=vo>—</div>`;
+ if(n==="Tỉ lệ")return `<h3>Tỉ lệ</h3><div class=row><input id=ra placeholder="A"><input id=rb placeholder="B"><input id=rc placeholder="C"></div><button class=mini onclick=ratioCalc()>TÌM D</button><div class=out id=ro>—</div>`;
+ if(n==="Phân phối")return `<h3>Phân phối chuẩn</h3><div class=row><input id=nx placeholder="x"><input id=nm placeholder="μ"><input id=ns placeholder="σ"></div><button class=mini onclick=normalCalc()>TÍNH</button><div class=out id=no>—</div>`;
+ return `<h3>${n}</h3><div class=out>Chức năng đang sẵn sàng.</div>`;
+}
+function eqInputs(){let n=+$("degEq").value,a=[];for(let i=n;i>=0;i--)a.push(`<input id="eq${i}" placeholder="${i===n?'a'+i+' ≠ 0':'a'+i}">`);$("eqcoef").innerHTML='<div class=grid2>'+a.join('')+'</div>'}
+function ineqInputs(){let n=+$("degIneq").value,a=[];for(let i=n;i>=0;i--)a.push(`<input id="iq${i}" placeholder="${i===n?'a'+i+' ≠ 0':'a'+i}">`);$("ineqcoef").innerHTML='<div class=grid2>'+a.join('')+'</div>'}
+function systemInputs(){let n=+$("sysN").value;if(n===2){$("syscoef").innerHTML='<div class=grid3><input id=s11 placeholder=a₁₁><input id=s12 placeholder=a₁₂><input id=sb1 placeholder=b₁><input id=s21 placeholder=a₂₁><input id=s22 placeholder=a₂₂><input id=sb2 placeholder=b₂></div>'}else{$("syscoef").innerHTML='<div class=grid3>'+Array.from({length:12},(_,i)=>`<input id=s${i} placeholder="${['a11','a12','a13','b1','a21','a22','a23','b2','a31','a32','a33','b3'][i]}">`).join('')+'</div>'}}
+function nums(id){return Number($(id).value)}
+function evalF(expr,x){let s=prep(expr).replace(/\bx\b/g,"("+x+")");return Function("state","fact","return "+s)(state,fact)}
+function derivativeCalc(){try{let f=$("df").value,x=nums("dx"),h=1e-5;let d=(evalF(f,x+h)-evalF(f,x-h))/(2*h);let d2=(evalF(f,x+2*h)-2*evalF(f,x)+evalF(f,x-2*h))/(4*h*h);menuResult("ĐẠO HÀM: f'("+format(x)+")","f'("+format(x)+") ≈ "+format(d)+"\nf''("+format(x)+") ≈ "+format(d2)+"\n\nPhương pháp sai phân trung tâm")}catch(e){menuError("ĐẠO HÀM","LỖI HÀM")}}
+function polyEval(c,x){let r=0;for(let a of c)r=r*x+a;return r}
+function polyDeriv(c){let n=c.length-1;return c.slice(0,-1).map((a,i)=>a*(n-i))}
+function rootsDK(c){let n=c.length-1;if(n<=0)return[];let lead=c[0];let mon=c.map(a=>a/lead);let R=1+Math.max(...mon.slice(1).map(Math.abs));let z=Array.from({length:n},(_,k)=>R*Math.pow(.5,0)*Math.cos(2*Math.PI*k/n)+R*Math.sin(2*Math.PI*k/n)*Math.sqrt(1)); // initial circle
+z=z.map((_,k)=>R*new Complex(Math.cos(2*Math.PI*k/n),Math.sin(2*Math.PI*k/n)));
+for(let it=0;it<200;it++){let max=0;for(let i=0;i<n;i++){let p=polyComplex(mon,z[i]),den=new Complex(1,0);for(let j=0;j<n;j++)if(i!==j)den=den.mul(z[i].sub(z[j]));let dz=p.div(den);z[i]=z[i].sub(dz);max=Math.max(max,dz.abs())}if(max<1e-10)break}
+return z.map(q=>q.re).filter((x,i)=>Math.abs(z[i].im)<1e-7).sort((a,b)=>a-b).filter((x,i,a)=>i===0||Math.abs(x-a[i-1])>1e-5)}
+class Complex{constructor(re,im){this.re=re;this.im=im}add(q){return new Complex(this.re+q.re,this.im+q.im)}sub(q){return new Complex(this.re-q.re,this.im-q.im)}mul(q){return new Complex(this.re*q.re-this.im*q.im,this.re*q.im+this.im*q.re)}div(q){let d=q.re*q.re+q.im*q.im;return new Complex((this.re*q.re+this.im*q.im)/d,(this.im*q.re-this.re*q.im)/d)}abs(){return Math.hypot(this.re,this.im)}}
+function polyComplex(c,z){let r=new Complex(c[0],0);for(let i=1;i<c.length;i++)r=r.mul(z).add(new Complex(c[i],0));return r}
+function getCoeffs(prefix,n){let c=[];for(let i=n;i>=0;i--)c.push(Number($(prefix+i).value));return c}
+function polyEqCalc(){let n=+$("degEq").value,c=getCoeffs("eq",n);if(!c[0])return menuError("PHƯƠNG TRÌNH","Hệ số bậc cao nhất phải khác 0.");let r=rootsDK(c);menuResult("PHƯƠNG TRÌNH BẬC "+n,r.length?"Nghiệm thực:\n"+r.map((x,i)=>"x"+(i+1)+" = "+format(x)).join("\n")+"\n\nĐã xét phương trình bậc "+n+".":"Không tìm thấy nghiệm thực.")}
+function intervalsFor(c){let r=rootsDK(c),pts=[-Infinity,...r,Infinity],out=[];for(let i=0;i<pts.length-1;i++){let a=pts[i],b=pts[i+1],x;if(a===-Infinity)x=r[0]-Math.max(1,Math.abs(r[0])+1);else if(b===Infinity)x=r.at(-1)+Math.max(1,Math.abs(r.at(-1))+1);else x=(a+b)/2;out.push({a,b,sign:Math.sign(polyEval(c,x))})}return {r,out}}
+function fmtInt(a,b){return `(${a===-Infinity?"-∞":format(a)}, ${b===Infinity?"+∞":format(b)})`}
+function polyIneqCalc(){let n=+$("degIneq").value,c=getCoeffs("iq",n),op=$("ineqOp").value;if(!c[0])return menuError("BẤT PHƯƠNG TRÌNH","Hệ số bậc cao nhất phải khác 0.");let z=intervalsFor(c),r=z.r,out=z.out,includeZero=op.includes("="),want=op[0]===">"?1:-1,ans=[];for(let i=0;i<out.length;i++)if(out[i].sign===want)ans.push(fmtInt(out[i].a,out[i].b));if(includeZero&&r.length)ans.push(...r.map(x=>format(x)));menuResult("BẤT PHƯƠNG TRÌNH BẬC "+n,"Nghiệm thực của f(x)=0:\n"+(r.length?r.map(format).join(", "):"không có")+"\n\nTập nghiệm "+op+" 0:\n"+(ans.length?ans.join(" ∪ "):"∅"))}
+function systemCalc(){let n=+$("sysN").value;if(n===2){let a=nums("s11"),b=nums("s12"),c=nums("s21"),d=nums("s22"),e=nums("sb1"),f=nums("sb2"),D=a*d-b*c;if(Math.abs(D)<1e-12)return menuError("HỆ PHƯƠNG TRÌNH","D = 0: hệ suy biến, cần xét thêm điều kiện.");return menuResult("HỆ 2 ẨN","x = "+format((e*d-b*f)/D)+"\ny = "+format((a*f-e*c)/D))}let A=Array.from({length:3},(_,i)=>[nums("s"+(i*4)),nums("s"+(i*4+1)),nums("s"+(i*4+2)),nums("s"+(i*4+3))]);for(let i=0;i<3;i++){let m=i;for(let j=i+1;j<3;j++)if(Math.abs(A[j][i])>Math.abs(A[m][i]))m=j;[A[i],A[m]]=[A[m],A[i]];if(Math.abs(A[i][i])<1e-12)return menuError("HỆ 3 ẨN","Hệ không có nghiệm duy nhất.");for(let j=i+1;j<3;j++){let q=A[j][i]/A[i][i];for(let k=i;k<4;k++)A[j][k]-=q*A[i][k]}}let x=[0,0,0];for(let i=2;i>=0;i--)x[i]=(A[i][3]-A[i][i+1]*x[i+1]-(i===0?A[i][2]*x[2]:0))/A[i][i];menuResult("HỆ 3 ẨN","x = "+format(x[0])+"\ny = "+format(x[1])+"\nz = "+format(x[2]))}
+function verifyCalc(){try{let a=Function("state","fact","return "+prep($("vl").value))(state,fact),b=Function("state","fact","return "+prep($("vr").value))(state,fact),op=$("checkop").value,ok=op==="="?Math.abs(a-b)<1e-10:op===">"?a>b:op==="<"?a<b:op===">="?a>=b:a<=b;menuResult("ĐÚNG/SAI",ok?"ĐÚNG ✓\n"+format(a)+" "+op+" "+format(b):"SAI ✗\n"+format(a)+" "+op+" "+format(b))}catch(e){menuError("ĐÚNG/SAI","LỖI CÚ PHÁP")}}
+function tableCalc(){try{let f=$("fx").value,A=+$("st").value,B=+$("en").value,S=+$("sp").value,out=[];for(let x=A,i=0;x<=B&&i<500;x+=S,i++)out.push(format(x)+"\tf("+format(x)+") = "+format(evalF(f,x)));menuResult("BẢNG GIÁ TRỊ","x\tf(x)\n"+out.join("\n"))}catch(e){menuError("BẢNG GIÁ TRỊ","LỖI CÚ PHÁP")}}
+function statsCalc(){let a=$("statData").value.split(",").map(Number).filter(Number.isFinite);if(!a.length)return menuError("THỐNG KÊ","LỖI DỮ LIỆU");let mean=a.reduce((x,y)=>x+y,0)/a.length,s=[...a].sort((x,y)=>x-y),med=s.length%2?s[(s.length-1)/2]:(s[s.length/2-1]+s[s.length/2])/2,v=a.reduce((x,y)=>x+(y-mean)**2,0)/a.length;menuResult("THỐNG KÊ","n="+a.length+"\nTrung bình = "+mean+"\nPhương sai = "+v+"\nĐộ lệch chuẩn = "+Math.sqrt(v)+"\nMin = "+s[0]+"\nTrung vị = "+med+"\nMax = "+s.at(-1))}
+function complexCalc(){let a=$("c1").value,b=$("c2").value;let parse=z=>{let m=z.replace(/\s/g,"").match(/^([+-]?\d*\.?\d+)?([+-]\d*\.?\d+)i$/);return m?[Number(m[1]||0),Number(m[2])]:[Number(z),0]};let x=parse(a),y=parse(b),r=[x[0]+y[0],x[1]+y[1]];menuResult("SỐ PHỨC","Tổng = "+r[0]+" "+(r[1]>=0?"+":"")+r[1]+"i\n|z| = "+Math.hypot(...r))}
+function matrixCalc(t){let a=nums("m11"),b=nums("m12"),c=nums("m21"),d=nums("m22"),det=a*d-b*c;if(t==="det")menuResult("MA TRẬN — ĐỊNH THỨC","Định thức = "+format(det));else if(t==="inv")menuResult("MA TRẬN — NGHỊCH ĐẢO",det?"[ "+format(d/det)+"  "+format(-b/det)+" ]\n[ "+format(-c/det)+"  "+format(a/det)+" ]":"Không có nghịch đảo")}
+function vectorCalc(){let ax=nums("vax"),ay=nums("vay"),az=nums("vaz"),bx=nums("vbx"),by=nums("vby"),bz=nums("vbz");menuResult("VECTƠ","A·B = "+(ax*bx+ay*by+az*bz)+"\n|A| = "+Math.hypot(ax,ay,az)+"\n|B| = "+Math.hypot(bx,by,bz))}
+function ratioCalc(){let a=nums("ra"),b=nums("rb"),c=nums("rc");menuResult("TỈ LỆ","D = B×C/A = "+format(b*c/a))}
+function normalCalc(){let x=nums("nx"),m=nums("nm"),sig=nums("ns");menuResult("PHÂN PHỐI CHUẨN","Mật độ = "+(Math.exp(-.5*((x-m)/sig)**2)/(sig*Math.sqrt(2*Math.PI))))}
+function setTheme(t){document.body.className=t==="default"?"":t;localStorage.setItem("studyTheme",t);$("themeo")&&($("themeo").textContent="Đã chọn giao diện: "+t)}
+function customTheme(){let bg=$("customBg").value.trim(),ac=$("customAccent").value.trim();if(bg)document.documentElement.style.setProperty("--bg1",bg);if(ac)document.documentElement.style.setProperty("--accent",ac);localStorage.setItem("customBg",bg);localStorage.setItem("customAccent",ac);$("themeo").textContent="Đã tạo giao diện riêng và lưu trên thiết bị."}
+function resetTheme(){document.body.className="";document.documentElement.style.removeProperty("--bg1");document.documentElement.style.removeProperty("--accent");localStorage.removeItem("studyTheme");localStorage.removeItem("customBg");localStorage.removeItem("customAccent");if($("themeo"))$("themeo").textContent="Đã đặt lại giao diện mặc định."}
+$("menuGrid").innerHTML=menus.map(x=>`<button onclick="choose('${x.replaceAll("'","\\'")}')">${x}</button>`).join("");
+render();
+let saved=localStorage.getItem("studyTheme");if(saved)setTheme(saved);let cb=localStorage.getItem("customBg"),ca=localStorage.getItem("customAccent");if(cb)document.documentElement.style.setProperty("--bg1",cb);if(ca)document.documentElement.style.setProperty("--accent",ca);
+document.addEventListener("keydown",e=>{if(/[0-9.+\-*/()]/.test(e.key))insert(e.key);else if(e.key==="Enter")calculate();else if(e.key==="Backspace")del();else if(e.key==="Escape")exitMode()});
+</script>
+</body>
+</html>
